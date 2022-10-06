@@ -4,6 +4,7 @@ import { NavigationContainer } from "@react-navigation/native";
 
 import Home from "../screens/home/Home";
 import Detail from "../screens/detail/Detail";
+import { COLORS } from "../constants";
 
 const StackNavigation = () => {
   const Stack = createNativeStackNavigator();
@@ -18,7 +19,22 @@ const StackNavigation = () => {
             headerShown: false
           }}
         />
-        <Stack.Screen name="Detail" component={Detail} />
+        <Stack.Screen
+          name="Detail"
+          component={Detail}
+          options={{
+            title: "Detalle",
+
+            headerStyle: {
+              backgroundColor: COLORS.detail
+            },
+            headerTintColor: COLORS.text,
+            headerTitleStyle: {
+              fontWeight: "bold"
+            },
+            headerBackTitle: "Atras"
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

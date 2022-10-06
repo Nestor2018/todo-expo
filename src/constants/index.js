@@ -1,8 +1,11 @@
 const COLORS = {
-  primary: "#2976c2",
+  primary: "#69a1d9",
   secondary: "#95d8dc",
   text: "#3da0cb",
-  white: "#f3f3f3"
+  white: "#f3f3f3",
+  success: "#3ba536",
+  cancel: "#e41e25",
+  detail: "#d2eaea"
 };
 
 const SIZES = {
@@ -23,9 +26,3 @@ const SHADOW = {
 };
 
 export { COLORS, SIZES, SHADOW };
-
-//.color1 {color: #2976c2;}
-//.color2 {color: #3da0cb;}
-//.color3 {color: #95d8dc;}
-//.color4 {color: #d2eaea;}
-//.color5 {color: #f3f3f3;}

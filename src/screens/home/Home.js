@@ -7,62 +7,206 @@ import {
   Platform,
   FlatList,
   TextInput,
-  TouchableOpacity
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator
 } from "react-native";
 
-import { COLORS, SIZES, FONTS, SHADOW } from "../../constants";
+import { COLORS, SIZES, SHADOW } from "../../constants";
 import Card from "../../components/card/Card";
+import Http from "../../utilities/http";
+import ListEmpty from "../../components/listEmpty/ListEmpty";
 
 const Home = ({ navigation }) => {
-  const List = [
-    {
-      id: 1,
-      title: "titulo1",
-      description: "descripcion1 mas larga",
-      status: true
-    },
-    { id: 2, title: "titulo2", description: "descripcion2", status: true },
-    { id: 3, title: "titulo3", description: "descripcion3", status: true },
-    { id: 4, title: "titulo4", description: "descripcion4", status: true }
-  ];
+  const [loading, setLoading] = useState(false);
 
   const [list, setList] = useState([]);
+  const [listSearch, setListSearch] = useState([]);
   const [value, setValue] = useState("");
+  const [numberRamdom, setNumberRamdom] = useState("");
+  const [search, setSearch] = useState("");
 
-  function addText(text) {
+  /**
+   * addActivity. -> add activity to list
+   *
+   * @param {string} text -> title of the activity
+   */
+  const addActivity = text => {
     if (value !== "") {
       setList(prev => {
-        return [
-          ...prev,
-          { title: text, description: "", status: true } // Adding a JS Object
-        ];
+        return [...prev, { title: text, description: "", status: false }];
+      });
+
+      setListSearch(prev => {
+        return [...prev, { title: text, description: "", status: false }];
       });
       setValue("");
     } else {
-      alert("Please type in something!");
+      getData(7);
     }
-  }
+  };
+
+  /**
+   * addRamdom. -> add ramdoms activities to list
+   */
+  const addRamdom = async () => {
+    setLoading(true);
+    let resp = await Http.instance.get(
+      `https://catfact.ninja/facts?limit=${numberRamdom}&max_length=140`
+    );
+
+    resp.data.map(item => {
+      setList(prev => {
+        return [...prev, { title: item.fact, description: "", status: false }];
+      });
+      setListSearch(prev => {
+        return [...prev, { title: item.fact, description: "", status: false }];
+      });
+      setNumberRamdom("");
+    });
+    setLoading(false);
+  };
+
+  /**
+   * setIsSelected. -> change status activity
+   *
+   * @param {number} index -> index of the activity
+   * @param {boolean} value -> boolean button checkbox of the activity
+   */
+  const setIsSelected = (index, value) => {
+    let data = [];
+
+    for (let i = 0; i < list.length; i++) {
+      if (index === i) {
+        data.push({ ...list[i], status: value });
+      } else {
+        data.push(list[i]);
+      }
+    }
+
+    setList(data);
+    setListSearch(data);
+  };
+
+  /**
+   * changeDescription. -> change description of the activity
+   *
+   * @param {number} index -> index of the activity
+   * @param {text} value ->  description of the activity
+   */
+  const changeDescription = (index, value) => {
+    let data = [];
+
+    for (let i = 0; i < list.length; i++) {
+      if (index === i) {
+        data.push({ ...list[i], description: value });
+      } else {
+        data.push(list[i]);
+      }
+    }
+
+    setList(data);
+    setListSearch(data);
+  };
+
+  /**
+   * deleteItem. -> delete activity from the list
+   *
+   * @param {number} idx -> index of the activity
+   */
+  const deleteItem = idx => {
+    Alert.alert("Delete Item", "Are you sure you want to delete this item?", [
+      {
+        text: "Cancel",
+        style: "cancel"
+      },
+      {
+        text: "Yes",
+        onPress: () => {
+          const data = list.filter((item, index) => index !== idx);
+          setList(data);
+          setListSearch(data);
+        }
+      }
+    ]);
+  };
+
+  /**
+   * searchFilter. -> filter activities by description text
+   *
+   * @param {text} text -> text to filter
+   */
+  const searchFilter = text => {
+    if (text) {
+      const newData = list.filter(function(item) {
+        const itemData = item.description
+          ? item.description.toUpperCase()
+          : "".toUpperCase();
+        const textData = text.toUpperCase();
+        return itemData.indexOf(textData) > -1;
+      });
+      setListSearch(newData);
+      setSearch(text);
+    } else {
+      setListSearch(list);
+      setSearch(text);
+    }
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Lista de actividades</Text>
+      {loading ? (
+        <ActivityIndicator color="white" size="large" style={styles.loader} />
+      ) : null}
+      <TextInput
+        style={styles.textInputStyle}
+        onChangeText={text => searchFilter(text)}
+        value={search}
+        underlineColorAndroid="transparent"
+        placeholder="Busqueda por descripción"
+      />
       <FlatList
         style={{ flex: 1 }}
-        data={List}
+        data={listSearch}
         renderItem={({ item, index }) => (
-          <Card data={item} index={index} navigation={navigation} />
+          <Card
+            data={item}
+            index={index}
+            navigation={navigation}
+            setIsSelected={setIsSelected}
+            deleteItem={deleteItem}
+            changeDescription={changeDescription}
+          />
         )}
         keyExtractor={(item, index) => index.toString()}
+        ListEmptyComponent={<ListEmpty />}
+        initialNumToRender={7}
       />
       <View style={styles.textBoxWrapper}>
         <TextInput
           style={styles.textInput}
-          placeholder="New Task"
-          placeholderTextColor={COLORS.primary}
+          placeholder="Agregar actividades aleatoriamente"
+          placeholderTextColor={COLORS.white}
+          onChangeText={text => setNumberRamdom(text)}
+          value={numberRamdom}
+        />
+        <TouchableOpacity style={styles.btn} onPress={() => addRamdom()}>
+          <Text style={{ fontSize: 34, color: COLORS.secondary }}>+</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.textBoxWrapper}>
+        <TextInput
+          style={styles.textInput}
+          placeholder="Agregar actividad"
+          placeholderTextColor={COLORS.white}
           onChangeText={text => setValue(text)}
           value={value}
         />
-        <TouchableOpacity style={styles.btn} onPress={() => addText(value)}>
+        <TouchableOpacity
+          style={styles.btn}
+          onPress={() => addActivity(value)}
+        >
           <Text style={{ fontSize: 34, color: COLORS.secondary }}>+</Text>
         </TouchableOpacity>
       </View>
@@ -74,7 +218,7 @@ const styles = StyleSheet.create({
   container: {
     paddingTop: Platform.OS === "ios" ? 40 : StatusBar.currentHeight + 10,
     height: "100%",
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.secondary,
     padding: SIZES.padding
   },
   title: {
@@ -82,10 +226,8 @@ const styles = StyleSheet.create({
     fontSize: SIZES.h1
   },
   textBoxWrapper: {
-    width: "100%",
-    position: "absolute",
-    bottom: "5%",
-    left: 0,
+    width: "90%",
+    marginBottom: 10,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -94,11 +236,11 @@ const styles = StyleSheet.create({
   textInput: {
     ...SHADOW,
     borderRadius: SIZES.textBoxRadius,
-    backgroundColor: COLORS.secondary,
+    backgroundColor: COLORS.primary,
     height: 42,
     paddingLeft: 15,
     width: "90%",
-    color: COLORS.primary,
+    color: COLORS.white,
     marginRight: 15
   },
   btn: {
@@ -109,6 +251,14 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     alignItems: "center",
     justifyContent: "center"
+  },
+  textInputStyle: {
+    height: 40,
+    borderWidth: 1,
+    paddingLeft: 20,
+    margin: 5,
+    borderColor: "#009688",
+    backgroundColor: "#FFFFFF"
   }
 });
 export default Home;

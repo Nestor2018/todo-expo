@@ -1,25 +1,55 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  TextInput
+} from "react-native";
 import Checkbox from "expo-checkbox";
 
-import { COLORS, SIZES, FONTS, SHADOW } from "../../constants";
+import { COLORS, SIZES, SHADOW } from "../../constants";
+import IconCancel from "../../../assets/icons/cancel";
 
-const Card = ({ data, navigation }) => {
-  const [isChecked, setChecked] = useState(false);
+const Card = ({
+  data,
+  index,
+  navigation,
+  setIsSelected,
+  deleteItem,
+  changeDescription
+}) => {
   return (
     <TouchableOpacity
       style={styles.container}
-      onPress={() => navigation.navigate("Detail")}
+      onPress={() => navigation.navigate("Detail", { data })}
     >
       <Checkbox
         style={styles.checkbox}
-        value={isChecked}
-        onValueChange={setChecked}
-        color={isChecked ? "#4630EB" : undefined}
+        value={data.status}
+        onValueChange={value => setIsSelected(index, value)}
+        color={data.status ? COLORS.success : undefined}
       />
       <View style={styles.containerText}>
-        <Text style={styles.title}>{data.title}</Text>
-        <Text style={styles.description}>{data.description}</Text>
+        <Text style={[styles.title, data.status && styles.textDecoration]}>
+          {data.title}
+        </Text>
+        <TextInput
+          style={styles.description}
+          value={data.description}
+          onChangeText={val => changeDescription(index, val)}
+          placeholder="Escribe la descripción"
+        />
+      </View>
+      <View>
+        <TouchableOpacity onPress={() => deleteItem(index)}>
+          <IconCancel
+            style={styles.icon}
+            height={25}
+            width={25}
+            fill={COLORS.cancel}
+          />
+        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
@@ -35,19 +65,30 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderRadius: SIZES.borderRadius,
     flexDirection: "row",
-    alignItems: "center"
+    alignItems: "center",
+    justifyContent: "space-between"
   },
   containerText: {
-    marginLeft: 20
-    //alignItems: "center"
+    marginLeft: 20,
+    width: "75%"
   },
   title: {
     fontSize: SIZES.h2,
-    color: COLORS.text
+    color: COLORS.text,
+    textAlign: "center"
   },
   description: {
     fontSize: SIZES.p,
-    color: COLORS.text
+    color: COLORS.text,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.text
+  },
+  icon: {
+    alignSelf: "center"
+  },
+  checkbox: {},
+  textDecoration: {
+    textDecorationLine: "line-through"
   }
 });
 
