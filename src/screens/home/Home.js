@@ -42,7 +42,10 @@ const Home = ({ navigation }) => {
       });
       setValue("");
     } else {
-      getData(7);
+      Alert.alert(
+        "Campo vacio",
+        "Por favor escriba el nombre de la actividad"
+      );
     }
   };
 
@@ -50,21 +53,34 @@ const Home = ({ navigation }) => {
    * addRamdom. -> add ramdoms activities to list
    */
   const addRamdom = async () => {
-    setLoading(true);
-    let resp = await Http.instance.get(
-      `https://catfact.ninja/facts?limit=${numberRamdom}&max_length=140`
-    );
+    if (numberRamdom !== "") {
+      setLoading(true);
+      let resp = await Http.instance.get(
+        `https://catfact.ninja/facts?limit=${numberRamdom}&max_length=140`
+      );
 
-    resp.data.map(item => {
-      setList(prev => {
-        return [...prev, { title: item.fact, description: "", status: false }];
+      resp.data.map(item => {
+        setList(prev => {
+          return [
+            ...prev,
+            { title: item.fact, description: "", status: false }
+          ];
+        });
+        setListSearch(prev => {
+          return [
+            ...prev,
+            { title: item.fact, description: "", status: false }
+          ];
+        });
+        setNumberRamdom("");
       });
-      setListSearch(prev => {
-        return [...prev, { title: item.fact, description: "", status: false }];
-      });
-      setNumberRamdom("");
-    });
-    setLoading(false);
+      setLoading(false);
+    } else {
+      Alert.alert(
+        "Campo vacio",
+        "Por favor el número de actividades que desea agregar"
+      );
+    }
   };
 
   /**
@@ -115,20 +131,24 @@ const Home = ({ navigation }) => {
    * @param {number} idx -> index of the activity
    */
   const deleteItem = idx => {
-    Alert.alert("Delete Item", "Are you sure you want to delete this item?", [
-      {
-        text: "Cancel",
-        style: "cancel"
-      },
-      {
-        text: "Yes",
-        onPress: () => {
-          const data = list.filter((item, index) => index !== idx);
-          setList(data);
-          setListSearch(data);
+    Alert.alert(
+      "Eliminar actividad",
+      "¿Estas seguro que desea eliminar esta actividad?",
+      [
+        {
+          text: "Cancelar",
+          style: "cancel"
+        },
+        {
+          text: "Aceptar",
+          onPress: () => {
+            const data = list.filter((item, index) => index !== idx);
+            setList(data);
+            setListSearch(data);
+          }
         }
-      }
-    ]);
+      ]
+    );
   };
 
   /**
