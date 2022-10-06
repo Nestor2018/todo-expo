@@ -1,13 +1,16 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import Checkbox from "expo-checkbox";
 
 import { COLORS, SIZES, FONTS, SHADOW } from "../../constants";
 
-const Card = ({ data }) => {
+const Card = ({ data, navigation }) => {
   const [isChecked, setChecked] = useState(false);
   return (
-    <View style={styles.container}>
+    <TouchableOpacity
+      style={styles.container}
+      onPress={() => navigation.navigate("Detail")}
+    >
       <Checkbox
         style={styles.checkbox}
         value={isChecked}
@@ -18,7 +21,7 @@ const Card = ({ data }) => {
         <Text style={styles.title}>{data.title}</Text>
         <Text style={styles.description}>{data.description}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

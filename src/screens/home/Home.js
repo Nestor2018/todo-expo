@@ -13,7 +13,7 @@ import {
 import { COLORS, SIZES, FONTS, SHADOW } from "../../constants";
 import Card from "../../components/card/Card";
 
-const Home = () => {
+const Home = ({ navigation }) => {
   const List = [
     {
       id: 1,
@@ -49,7 +49,9 @@ const Home = () => {
       <FlatList
         style={{ flex: 1 }}
         data={List}
-        renderItem={({ item, index }) => <Card data={item} index={index} />}
+        renderItem={({ item, index }) => (
+          <Card data={item} index={index} navigation={navigation} />
+        )}
         keyExtractor={(item, index) => index.toString()}
       />
       <View style={styles.textBoxWrapper}>
